@@ -47,7 +47,7 @@ YouTube — это видеохостинг для загрузки, хране�
 - Общее время просмотров за день: 1 млрд часов  [[1]](https://www.globalmediainsight.com/blog/youtube-users-statistics/#YouTube_Users_by_Country_2025)
 - Суммарное количество поисков за день: 3,5 млрд [[1]](https://www.globalmediainsight.com/blog/youtube-users-statistics/#YouTube_Users_by_Country_2025) 
 - Среднее соотношение комментариев к просмотрам: 0,5%  [[4]](https://pixelvalleystudio.com/pmf-articles/4-key-youtube-channel-statistics-and-how-to-calculate-them) [[5]](https://tubularlabs.com/blog/3-metrics-youtube-success/)
-- Среднее соотношение лайков к просмотрам: 4%  [[4]](https://pixelvalleystudio.com/pmf-articles/4-key-youtube-channel-statistics-and-how-to-calculate-them)[[5]](https://tubularlabs.com/blog/3-metrics-youtube-success/)
+- Среднее соотношение лайков к просмотрам: 4%  [[4]](https://pixelvalleystudio.com/pmf-articles/4-key-youtube-channel-statistics-and-how-to-calculate-them) [[5]](https://tubularlabs.com/blog/3-metrics-youtube-success/)
 - Среднее соотношение подписок к просмотрам: 0,3–0,5% [[4]](https://pixelvalleystudio.com/pmf-articles/4-key-youtube-channel-statistics-and-how-to-calculate-them)
 
 
