@@ -582,7 +582,8 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 | Стамбул        | Video Delivery, Search/Recommendations | 3268,22           | 5,17                          | 2       | 2    |
 | Анкара         | Video Delivery, CDN                    | 1109,18           | 4,33                          | 2       | 2    |
 
-
+## 5. Логическая схема БД
+<img width="708" height="710" alt="image" src="https://github.com/user-attachments/assets/81ff6019-28fd-46c2-973d-7c3f15a1dc9f" />
 
 
 ## Источники
