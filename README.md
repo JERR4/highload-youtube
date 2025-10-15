@@ -596,6 +596,8 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 | `view`           | `id(16 B), user_id(16 B), video_id(16 B), watched_at(8 B), watch_duration (4 B)                                                                               | UUID, DATETIME, FLOAT                | Просмотры видео        | ~60 B                     | ~28,5 трлн              | ~20,1 млрд              | 82 176 / 205 440               | 41 667 / 104 167               | Eventual        | Шардирование по `video_id`; **индекс по video_id, user_id**; просмотры агрегируются в in-memory счётчики и кэшируются |
 | `subscription`   | `id(16 B), channel_id(16 B), subscriber_id(16 B), created_at(8 B)`                                                                                            | UUID, DATETIME                       | Подписки на каналы     | ~56 B                     | ~114 млрд               | ~82,8 млн               | 41 667 / 104 167               | 167 / 417                      | Сильная         | Шардирование по `channel_id`; **индекс по channel_id, subscriber_id**; кэш списка подписчиков популярных каналов      |
 
+## 6. Физическая схема БД
+<img width="679" height="675" alt="image" src="https://github.com/user-attachments/assets/730d72cb-2df7-460b-910c-feb077f6af3a" />
 
 ## Источники
 1. [Пользователи и демография YouTube 2025](https://www.globalmediainsight.com/blog/youtube-users-statistics/#YouTube_Users_by_Country_2025)
