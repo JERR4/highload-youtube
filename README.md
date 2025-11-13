@@ -681,7 +681,7 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 ## 10. Схема проекта
 <img width="1554" height="646" alt="structure" src="https://github.com/user-attachments/assets/7343b59d-554b-4427-bcb2-4aa588d6189e" />
 
-## Upload Service
+### Upload Service
 
 **Описание потока:**
 
@@ -690,7 +690,7 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 3. После проверки целостности чанков Upload Service загружает их в **S3**.
 4. После успешной загрузки создаётся событие `video_uploaded` → отправляется в **Kafka** (содержит `user_id`, `video_id`, `title`, `description`, `s3_urls[]`).
 
-## Video Processing / ML Embedding Service
+### Video Processing / ML Embedding Service
 
 **Описание потока:**
 
@@ -699,7 +699,7 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 3. Генерирует эмбеддинги с помощью **Hugging Face Transformers** по `title` и `description`.
 4. Полученные векторы сохраняются в таблицу **`video_vector`** в PostgreSQL (через pgvector).
 
-## Recommendation Service
+### Recommendation Service
 
 **Описание потока:**
 
