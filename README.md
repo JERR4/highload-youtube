@@ -683,8 +683,6 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 
 ### Upload Service
 
-**Описание потока:**
-
 1. Клиент через **API Gateway** отправляет запрос `POST /upload` с метаданными (`user_id`, `title`, `description`) и исходником видео.
 2. **Upload Service** принимает данные, разбивает видео на чанки и временно сохраняет их в буферное хранилище.
 3. После проверки целостности чанков Upload Service загружает их в **S3**.
@@ -692,16 +690,12 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 
 ### Video Processing / ML Embedding Service
 
-**Описание потока:**
-
 1. Слушает события `video_uploaded` из Kafka.
 2. Загружает метаданные и при необходимости фрагменты из S3.
 3. Генерирует эмбеддинги с помощью **Hugging Face Transformers** по `title` и `description`.
 4. Полученные векторы сохраняются в таблицу **`video_vector`** в PostgreSQL (через pgvector).
 
 ### Recommendation Service
-
-**Описание потока:**
 
 1. Подписан на события `video_index_ready`.
 2. По событию обновляет таблицу **`user_vector`**, используя агрегированные предпочтения.
