@@ -678,6 +678,10 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 | **CI/CD (GitHub / GitLab)**           | Canary deploy, rollback, тестирование перед релизом                  | Автоматическая проверка и постепенное обновление сервисов. При ошибке релиза выполняется автоматический откат к предыдущей стабильной версии.                                                                                  |
 | **Backup-система**                    | Ежедневные полные и инкрементальные копии, geo-redundant storage     | Все критичные данные (Postgres, ClickHouse, Elasticsearch) резервируются в нескольких регионах. Тест восстановления выполняется по расписанию.                                                                                 |
 
+## 10. Схема проекта
+<img width="1211" height="606" alt="structure" src="https://github.com/user-attachments/assets/2bab7554-fc67-490c-bd81-d713705dd603" />
+
+
 ## Источники
 1. [Пользователи и демография YouTube 2025](https://www.globalmediainsight.com/blog/youtube-users-statistics/#YouTube_Users_by_Country_2025)
 2. [Аналитика трафика YouTube — SEMrush](https://www.semrush.com/seo/26309235)
