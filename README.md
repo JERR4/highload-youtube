@@ -1,4 +1,4 @@
-<img width="1434" height="646" alt="structure" src="https://github.com/user-attachments/assets/7383e790-2e1d-4041-91f2-3c46d7d9cd53" /># Проектирование высоконагруженных приложений
+# Проектирование высоконагруженных приложений
 
 ## 1. Тема и целевая аудитория
 YouTube — это видеохостинг для загрузки, хранения, просмотра и распространения видеороликов, а также один из крупнейших сервисов для обмена контентом и взаимодействия с аудиторией.
@@ -679,7 +679,7 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 | **Backup-система**                    | Ежедневные полные и инкрементальные копии, geo-redundant storage     | Все критичные данные (Postgres, ClickHouse, Elasticsearch) резервируются в нескольких регионах. Тест восстановления выполняется по расписанию.                                                                                 |
 
 ## 10. Схема проекта
-<img width="1554" height="646" alt="structure" src="https://github.com/user-attachments/assets/f827afae-6415-48c5-a272-49f08274f565" />
+<img width="1434" height="646" alt="structure" src="https://github.com/user-attachments/assets/7383e790-2e1d-4041-91f2-3c46d7d9cd53" />
 
 
 ## Upload Service
