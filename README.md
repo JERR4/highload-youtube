@@ -705,6 +705,9 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
    * Результаты кешируются (TTL).
 4. Рекомендации фильтруются по активности, автору, приватности и т.д.
 
+## Список серверов
+
+
 
 ## Источники
 1. [Пользователи и демография YouTube 2025](https://www.globalmediainsight.com/blog/youtube-users-statistics/#YouTube_Users_by_Country_2025)
