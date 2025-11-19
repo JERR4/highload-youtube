@@ -679,11 +679,12 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 | **Backup-система**                    | Ежедневные полные и инкрементальные копии, geo-redundant storage     | Все критичные данные (Postgres, ClickHouse, Elasticsearch) резервируются в нескольких регионах. Тест восстановления выполняется по расписанию.                                                                                 |
 
 ## 10. Схема проекта
-<img width="1554" height="646" alt="structure" src="https://github.com/user-attachments/assets/7343b59d-554b-4427-bcb2-4aa588d6189e" />
+<img width="1054" height="601" alt="structure" src="https://github.com/user-attachments/assets/4818527d-9c95-4d48-babf-072d6feffa4f" />
+
 
 ### Upload Service
 
-1. Клиент через **API Gateway** отправляет запрос `POST /upload` с метаданными (`user_id`, `title`, `description`) и исходником видео.
+1. Клиент отправляет запрос `POST /upload` с метаданными (`user_id`, `title`, `description`) и исходником видео.
 2. **Upload Service** принимает данные, разбивает видео на чанки и временно сохраняет их в буферное хранилище.
 3. После проверки целостности чанков Upload Service загружает их в **S3**.
 4. После успешной загрузки создаётся событие `video_uploaded` → отправляется в **Kafka** (содержит `user_id`, `video_id`, `title`, `description`, `s3_urls[]`).
