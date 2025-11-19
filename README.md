@@ -679,7 +679,7 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 | **Backup-система**                    | Ежедневные полные и инкрементальные копии, geo-redundant storage     | Все критичные данные (Postgres, ClickHouse, Elasticsearch) резервируются в нескольких регионах. Тест восстановления выполняется по расписанию.                                                                                 |
 
 ## 10. Схема проекта
-<img width="1054" height="601" alt="structure" src="https://github.com/user-attachments/assets/4818527d-9c95-4d48-babf-072d6feffa4f" />
+<img width="1054" height="601" alt="structure" src="https://github.com/user-attachments/assets/a473ddc8-df54-4615-bcdd-6e25ced789c6" />
 
 
 ### Upload Service
