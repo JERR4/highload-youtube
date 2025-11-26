@@ -382,63 +382,46 @@ $$
 | Африка            | Йоханнесбург    | Video Delivery, Upload                  | 0,85/2,13                  | 400,00/1000,00            | -                       | -             | -             |-        | 500,00/1250,00            |
 |                   | Найроби         | Video Delivery, CDN                     | -                          | 400,00/1000,00            | -                       | -                           | -                          | -                   | -                         |
 |                   | Алжир           | Video Delivery, Search/Recommendations | -                          | 400,00/1000,00            | 500,00/1250,00         | -                           | -                          | -                   | 500,00/1250,00            |
-### DNS балансировка
+
+### DNS / GNS балансировка
 
 **Схема работы:**
 
-* Используется GeoDNS для глобального распределения пользователей.
-* Каждому региону или стране присваивается набор Anycast-адресов, анонсируемых ближайшими датацентрами. DNS возвращает пользователю один из этих адресов в зависимости от геолокации.
+* На глобальном уровне используется GNS/GSLB.
+* Для каждого региона/страны определяется один или несколько пулов ДЦ.
+* GNS при выдаче DNS-ответа учитывает:
+  * геолокацию пользователя,
+  * текущую нагрузку пула (RPS, CPU/IO),
+  * сетевые задержки и ошибки,
+  * состояние кэшей/сервисов.
+* В ответе клиенту возвращается IP (anycast), соответствующий выбранному пулу.
 
 **Влияние на продуктовые метрики:**
 
-* **Региональная сегментация нагрузки:** позволяет разделять глобальную аудиторию по зонам, облегчая управление ресурсами.
+* **Региональная сегментация нагрузки:** глобальная аудитория делится по зонам и ДЦ, что упрощает управление ресурсами и затратами.
+* **Контроль деградаций:** при перегрузке или проблемах в одном ДЦ GNS снижает долю его пула в DNS-ответах и переводит пользователей на соседние площадки.
 
-DNS определяет региональный ДЦ, задавая «глобальные границы» маршрутизации. Она не выбирает конкретный сервер, а определяет регион обслуживания.
+DNS/GNS определяет не только регион обслуживания, но и конкретный пул, опираясь на географию и фактическую нагрузку.
+
 
 ### Anycast балансировка
 
 **Схема работы:**
 
-* Один и тот же **IP адрес анонсируется из нескольких ДЦ**.
-* Сетевые маршрутизаторы автоматически выбирают ближайший или наименее загруженный путь.
-* При падении одного ДЦ трафик автоматически перенаправляется на другие узлы с тем же Anycast IP.
+* Один и тот же IP-адрес анонсируется из нескольких датацентров, входящих в один пул.
+* Сетевые маршрутизаторы выбирают маршрут на основе BGP-метрик (AS-path, local-pref и политики операторов).
+* При падении одного ДЦ его маршрут отзывается, и трафик автоматически перенаправляется на другие узлы с тем же anycast IP.
 
 **Влияние на продуктовые метрики:**
 
-* **Быстрое переключение при сбоях:** пользовательский IP остаётся неизменным.
-* **Равномерное распределение нагрузки:** снижает пиковые задержки на потоковую передачу видео.
-* **Повышение отказоустойчивости:** критические сервисы продолжают работать без заметного влияния на клиента.
+* **Быстрое переключение при сбоях:** пользовательский IP остаётся неизменным при отказе отдельного ДЦ.
+* **Снижение сетевой задержки:** пользователь попадает в ближайшую с точки зрения маршрутизации точку.
+* **Повышение доступности сервисов:** отказ отдельного узла не приводит к потере точки входа.
 
-**Связь с DNS:** 
-Внутри региона, выбранного через DNS, Anycast распределяет трафик между локальными узлами или ДЦ, обеспечивая высокую доступность и балансировку нагрузки. Он действует внутри региона, выбранного DNS, и распределяет нагрузку между несколькими датацентрами.
+**Связь с DNS/GNS:**
 
-### Механизм регулировки трафика между ДЦ
-
-**Ограничения Anycast:**
-
-* В классической схеме Anycast балансировка происходит на уровне маршрутизаторов (BGP).
-* Решения принимаются по сетевым метрикам, но не учитывают реальную нагрузку ДЦ (RPS, CPU, состояние кэша).
-* Регулировка возможна только косвенно — например, «удлиняя» путь или изменяя приоритет, что является грубым инструментом и не позволяет гибко балансировать.
-
-**Схема работы с GNS/GSLB:**
-
-* Используется Global Name Service (GNS) для динамического управления трафиком.
-* Система учитывает текущие метрики нагрузки: RPS, CPU/IO, доступность CDN-кэша, сетевые задержки.
-* DNS-ответы формируются не только по географии, но и с учётом состояния ДЦ.
-* При локальном пике или сбое трафик может быть оперативно перенаправлён в соседний ДЦ или резервный международный узел.
-* Управление выполняется через интеграцию с системами мониторинга (Prometheus, Grafana, Observability) и SDN-контроллерами.
-
-**Влияние на продуктовые метрики:**
-
-* **Минимизация отказов при перегрузке**: трафик уходит с перегруженного узла раньше, чем пользователи почувствуют деградацию.
-* **Стабильное качество видео и API**: регулировка нагрузки снижает задержки и исключает «узкие места».
-* **Оптимизация расходов**: предпочтение локального трафика внутри региона (дешевле, чем международный).
-
-
-**Связь с DNS и Anycast:**
-
-DNS задаёт глобальный регион .Anycast распределяет трафик между узлами внутри региона. GNS/GSLB динамически перераспределяет нагрузку между датацентрами по метрикам.
-Вместе эти механизмы обеспечивают оптимальное распределение нагрузки и высокую отказоустойчивость как на глобальном, так и на региональном уровнях.
+DNS/GNS управляет распределением трафика **между пулами датацентров**.  
+Anycast, в свою очередь, обеспечивает доставку трафика **внутри выбранного пула** до ближайшего сетевого узла, но не управляет нагрузкой между датацентрами по метрикам приложений.
 
 ## 4. Локальная балансировка нагрузки
 
@@ -581,13 +564,14 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 | Анкара         | Video Delivery, CDN                    | 1109,18           | 4,33                          | 2       | 2    |
 
 ## 5. Логическая схема БД
-<img width="735" height="718" alt="image" src="https://github.com/user-attachments/assets/504bd50f-e9b5-408f-beb2-a8ac10581ea3" />
+<img width="735" height="718" alt="501344423-504bd50f-e9b5-408f-beb2-a8ac10581ea3" src="https://github.com/user-attachments/assets/3e152345-3755-4661-bfc1-2212b99bab63" />
+
 
 
 | Таблица          | Поля (оценочный размер)                                                                                                                                       | Типы данных                          | Описание               | Примерный размер / запись | Общее кол-во записей    | Суточный прирост записей | RPS чтение (среднее / пиковое) | RPS запись (среднее / пиковое) | Консистентность | Кэши                                                                                     |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | ---------------------- | ------------------------- | ----------------------- | ----------------------- | ------------------------------ | ------------------------------ | --------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `user`           | `id(16 B), name(~50 B), email(~50 B), password_hash(32 B), avatar_url(~100 B), banner_url(~100 B), country(2 B), gender(1 B), created_at(8 B), birthday(3 B)` | UUID, VARCHAR, DATETIME, DATE        | Пользователи платформы | ~362 B                    | ~115 млн                | ~70 тыс                 | 82 176 / 205 440               | —                              | Сильная         | Кэш профилей авторов                                                                                                  |
-| `video`          | `id(16 B), title(~100 B), author_id(16 B), description(~1 KB), created_at(8 B), updated_at(8 B), thumbnail_url(~200 B), duration(4 B)`                        | UUID, VARCHAR, TEXT, DATETIME, FLOAT | Видеоконтент           | ~1,36 KB                  | ~5,1 млрд               | ~3,7 млн                | 82 176 / 205 440               | 43 / 108                       | Eventual        | Кэш метаданных видео                                                                                                  |
+| `video`          | `id(16 B), title(~100 B), author_id(16 B), description(~1 KB), created_at(8 B), updated_at(8 B), thumbnail_url(~200 B), duration(4 B), status(~50 B)`         | UUID, VARCHAR, TEXT, DATETIME, FLOAT | Видеоконтент           | ~1,36 KB                  | ~5,1 млрд               | ~3,7 млн                | 82 176 / 205 440               | 43 / 108                       | Eventual        | Кэш метаданных видео                                                                                                  |
 | `chunk`          | `id(16 B), video_id(16 B), quality(~10 B), chunk_index(4 B), url(~200 B), size(4 B), duration(4 B)`                                                           | UUID, INTEGER, VARCHAR, FLOAT        | Файловые чанки видео   | ~254 B                    | ~5,1 трлн               | ~3,7 млрд               | 41 667 / 104 167               | 43 / 108                       | Eventual        | Чанки кэшируются в CDN                                                                                                |
 | `comment`        | `id(16 B), text(~1 KB), video_id(16 B), author_id(16 B), created_at(8 B), updated_at(8 B), parental_comment_id(16 B)`                                         | UUID, TEXT, DATETIME                 | Комментарии к видео    | ~1,08 KB                  | ~142 млрд               | ~20,5 млн               | 41 667 / 104 167               | 167 / 417                      | Сильная         | Топ-комментарии кэшируются в CDN                                                                                      |
 | `video_reaction` | `id(16 B), author_id(16 B), video_id(16 B), is_upvote(1 B), created_at(8 B)`                                                                                  | UUID, BOOLEAN, DATETIME              | Лайки/дизлайки видео   | ~57 B                     | ~1,1 трлн               | ~827,9 млн              | 41 667 / 104 167               | 1 667 / 4 167                  | Сильная         | Счётчики лайков кэшируются                                                                                            |
@@ -595,8 +579,7 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 | `subscription`   | `id(16 B), channel_id(16 B), subscriber_id(16 B), created_at(8 B)`                                                                                            | UUID, DATETIME                       | Подписки на каналы     | ~56 B                     | ~114 млрд               | ~82,8 млн               | 41 667 / 104 167               | 167 / 417                      | Сильная         | Кэш списка подписчиков популярных каналов      |
 
 ## 6. Физическая схема БД
-<img width="880" height="498" alt="image" src="https://github.com/user-attachments/assets/00610fd7-617e-44d4-85f4-b0cc00375827" />
-
+<img width="994" height="547" alt="image" src="https://github.com/user-attachments/assets/7893dd03-d562-413f-8c04-a2d72899b649" />
 
 
 | Таблица / Хранилище | СУБД / хранение   | Типы данных / поля                                                                                                                                                           | Индексы                                                               | Шардирование                                                                      | Денормализация / кэш                                                           | Клиентские библиотеки / интеграции | Балансировка / мультиплексирование   | Резервное копирование / репликация                | Реплики / количество нод       |
@@ -604,10 +587,11 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 | **user**            | **PostgreSQL**    | `id UUID, name VARCHAR, email VARCHAR, password_hash CHAR(32), avatar_key VARCHAR, banner_key VARCHAR, country CHAR(2), gender CHAR(1), created_at TIMESTAMP, birthday DATE` | PK(id), UNIQUE(email)                                                 | hash по id (PK), hash по email (UNIQUE)                                           | хранение числа подписчиков — дублирование (кэш из `user_counters`)             | `pgx`, `go-sqlx`                   | PgBouncer для соединений             | full backup daily + incremental 6 ч, master–slave | Master: 1, Read: 3–4           |
 | **user_media**      | **S3**            | файлы аватаров и баннеров (`users/{uuid}/avatar.jpg`, `users/{uuid}/banner.png`)                                                                                             | —                                                                     | —                                                                                 | исходные файлы (нет денормализации)                                            | `minio-go`                         | S3 internal load balancing           | versioning + cross-region replication             | Multi-region (3 зоны)          |
 | **user_counters**   | **PostgreSQL**    | `user_id UUID, subscribers_count INT, subscriptions_count INT, videos_count INT`                                                                                             | PK(user_id)                                                           | hash по user_id                                                                   | агрегат — суммирует данные из `subscription`, `video`                          | `pgx`                              | PgBouncer                            | full backup + logical replication                 | Master: 1, Read: 2–3           |
-| **video**           | **PostgreSQL**    | `id UUID, title VARCHAR, author_id UUID, description TEXT, created_at TIMESTAMP, updated_at TIMESTAMP, thumbnail_key VARCHAR, duration FLOAT`                                | PK(id), INDEX(title), INDEX(author_id)                                | hash по id (PK), hash по author_id (INDEX author_id), hash по title (INDEX title) | лайки и просмотры — дублирование из `video_counters`; кэш имени/аватара автора | `pgx`                              | HAProxy (master + replicas)          | full + incremental backup, репликация             | Master: 1, Read: 3             |
+| **video**           | **PostgreSQL**    | `id UUID, title VARCHAR, author_id UUID, description TEXT, created_at TIMESTAMP, updated_at TIMESTAMP, thumbnail_key VARCHAR, duration FLOAT, status UUID`                   | PK(id), INDEX(title), INDEX(author_id)                                | hash по id (PK), hash по author_id (INDEX author_id), hash по title (INDEX title) | лайки и просмотры — дублирование из `video_counters`; кэш имени/аватара автора | `pgx`                              | HAProxy (master + replicas)          | full + incremental backup, репликация             | Master: 1, Read: 3             |
 | **video_media**     | **S3**            | превью (thumbnail): `videos/{uuid}/thumbnail.jpg`                                                                                                                            | —                                                                     | —                                                                                 | исходные файлы (нет денормализации)                                            | `minio-go`                         | S3 replication across CDN edge nodes | cross-region replication                          | Multi-region                   |
+| **video_status**    | **PostgreSQL**    | `id UUID, status_name VARCHAR`                                                                                                                                               | —                                                                     | —                                                                                 | —                                                                              | `pgx`                              | PgBouncer                            | backup + logical replication                      | Master: 1, Read: 2–3           |
 | **video_counters**  | **PostgreSQL**    | `video_id UUID, views INT, likes INT, comments INT`                                                                                                                          | PK(video_id)                                                          | hash по video_id                                                                  | агрегат — суммирует данные из `view`, `video_reaction`, `comment`              | `pgx`                              | PgBouncer                            | backup + logical replication                      | Master: 1, Read: 2–3           |
-| **video_search**    | **Elasticsearch** | `video_id, title, description, author_name, views`                                                                                                                           | fulltext index(title, description)                              | shard по video_id (для title/description), shard по author_name                   | дублирование данных из `video` — кэш для ускоренного поиска                    | `elastic/go-elasticsearch`         | Elastic load balancer                | snapshots + replication                           | ES nodes: 3                    |
+| **video_search**    | **Elasticsearch** | `video_id, title, description, author_name, views`                                                                                                                           | fulltext index(title, description)                              | shard по video_id (для title/description), shard по author_name                   | дублирование данных из `video` — кэш для ускоренного поиска                          | `elastic/go-elasticsearch`         | Elastic load balancer                | snapshots + replication                           | ES nodes: 3                    |
 | **chunk**           | **PostgreSQL**    | `id UUID, video_id UUID, quality VARCHAR, chunk_index INT, chunk_key VARCHAR, size INT, duration FLOAT`                                                                      | PK(id), INDEX(video_id, chunk_index)                                  | hash по id (PK), hash по video_id+chunk_index (INDEX)                             | исходные файлы (нет денормализации)                                            | `pgx`                              | connection pooler                    | full + incremental backup                         | Master: 1, Read: 2–3           |
 | **chunk_storage**   | **S3**            | файлы чанков: `videos/{video_id}/chunks/{quality}/chunk_{index}.mp4`                                                                                                         | —                                                                     | —                                                                                 | исходные файлы (нет денормализации)                                            | `minio-go`                         | S3 replication + edge cache          | cross-region replication                          | Multi-region                   |
 | **comment**         | **PostgreSQL**    | `id UUID, text TEXT, video_id UUID, author_id UUID, created_at TIMESTAMP, updated_at TIMESTAMP, parental_comment_id UUID`                                                    | PK(id), INDEX(video_id), INDEX(author_id), INDEX(parental_comment_id) | hash по id (PK), hash по video_id, hash по author_id, hash по parental_comment_id | топ-комментарии — кэш для быстрого вывода                                      | `pgx`, `go-sqlx`                   | Patroni failover                     | full + incremental backup                         | Master: 1, Read: 3–4           |
@@ -679,12 +663,12 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 | **Backup-система**                    | Ежедневные полные и инкрементальные копии, geo-redundant storage     | Все критичные данные (Postgres, ClickHouse, Elasticsearch) резервируются в нескольких регионах. Тест восстановления выполняется по расписанию.                                                                                 |
 
 ## 10. Схема проекта
-<img width="845" height="604" alt="structure" src="https://github.com/user-attachments/assets/c7e71c89-0afd-4e09-aa50-da721f4ba0ed" />
+<img width="864" height="624" alt="structure" src="https://github.com/user-attachments/assets/4b66eaa5-8597-4923-9da3-d2fc4a763f77" />
 
 ### Upload Service
 
 1. Клиент отправляет запрос `POST /upload` с метаданными (`user_id`, `title`, `description`) и исходником видео.
-2. **Upload Service** принимает данные, разбивает видео на чанки и временно сохраняет их в буферное хранилище.
+2. **Upload Service** принимает данные, временно сохраняет их в буферное хранилище и разбивает видео на чанки.
 3. После проверки целостности чанков Upload Service загружает их в **S3**.
 4. После успешной загрузки создаётся событие `video_uploaded` → отправляется в **Kafka** (содержит `user_id`, `video_id`, `title`, `description`, `s3_urls[]`).
 
