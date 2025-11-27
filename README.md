@@ -818,7 +818,6 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 | **Elasticsearch (data)** | 24      | 96       | 4         | **8**            |
 | **Elasticsearch (master)** | 4   | 16       | 0.5       | **3**            |
 | **ClickHouse**       | 24          | 64       | 6         | **8**            |
-| **Amazon S3**        | —           | —        | —         | **Managed**      |
 
 
 | Сервис / Хранилище        | Где разворачиваем        |
