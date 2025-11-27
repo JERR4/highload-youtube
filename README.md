@@ -830,19 +830,15 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 
 ### Расчет цены
 
-На hetzner [[11](https://www.hetzner.com/dedicated-rootserver/)]
+На aws [[15](https://calculator.aws/#/createCalculator/S3)]
 
-На aws [[12](https://calculator.aws/#/createCalculator/S3)]
-
-На Digital ocean [[13](https://cloud.digitalocean.com/kubernetes/clusters/new?i=3777d7)]
-
-| Сервис               | Цена за месяц (USD)     |
-| -------------------- | ----------------- |
-| **Stateless-сервисы**    | 62,493.84             |
-| **PostgreSQL**           | 5,448.72               |
-| **Elasticsearch**        | 3,178.42                |
-| **ClickHouse**           | 3,048.48               |
-| **Amazon S3**            | 968000    |
+| Сервис               | AWS инстанс  | Цена за месяц (USD)    |
+| -------------------- | ------------ |----------------------- |
+| **Stateless-сервисы**| c6g.8xlarge  | 62,493.84              |
+| **PostgreSQL**       | m6g.8xlarge  | 5,448.72               |
+| **Elasticsearch**    | m5zn.6xlarge | 6,000.60               |
+| **ClickHouse**       | m5zn.6xlarge | 3,048.48               |
+| **Amazon S3**        |              | 968000                 |
 
 
 ## Источники
@@ -860,3 +856,4 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 12. [Информация о среднем количестве просмотров](https://tubularlabs.com/blog/average-youtube-views/)
 13. [Информация о каналах](https://www.blogcadre.com/resources/how-many-youtube-channels-are-there/)
 14. [Статистика DAU по годам](https://www.statista.com/statistics/1252638/youtube-app-dau-worldwide/)
+15. [Калькулятор цен AWS](https://calculator.aws/#/createCalculator/S3)]
