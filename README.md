@@ -838,7 +838,7 @@ L7 – выполняет SSL Termination, поэтому учитываем и 
 | **PostgreSQL**       | m6g.8xlarge  | 5,448.72               |
 | **Elasticsearch**    | m5zn.6xlarge | 6,000.60               |
 | **ClickHouse**       | m5zn.6xlarge | 3,048.48               |
-| **Amazon S3**        |              | 968000                 |
+| **Amazon S3**        | Managed Object Storage  | 968000                 |
 
 
 ## Источники
